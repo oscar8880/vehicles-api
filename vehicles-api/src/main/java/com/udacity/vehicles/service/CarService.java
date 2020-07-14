@@ -20,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class CarService {
     private final CarRepository repository;
-
     private final WebClient webClientMaps;
     private final WebClient webClientPricing;
 
@@ -70,12 +69,7 @@ public class CarService {
          * meaning the Maps service needs to be called each time for the address.
          */
         Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
-        if(!optionalCar.isPresent()) {
-            throw new CarNotFoundException();
-        }
-
-        Car car = optionalCar.get();
-        System.out.println(car.toString());
+        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
 
         try {
             Price price = webClientPricing.get()
@@ -132,20 +126,11 @@ public class CarService {
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
-        Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
-        if(!optionalCar.isPresent()) {
-            throw new CarNotFoundException();
-        }
-
-        Car car = optionalCar.get();
-        repository.delete(car);
-
-
-
         /**
          * TODO: Delete the car from the repository.
          */
-
-
+        Optional<Car> optionalCar = Optional.ofNullable(repository.getOne(id));
+        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
+        repository.delete(car);
     }
 }

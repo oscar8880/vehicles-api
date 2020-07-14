@@ -21,6 +21,9 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import static org.junit.Assert.*;
+
+import org.mockito.internal.matchers.apachecommons.ReflectionEquals;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Implements testing of the CarController class.
@@ -94,11 +98,8 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
-        MvcResult result = mvc.perform(get("/cars"))
-            .andExpect(status().isOk())
-            .andReturn();
-
-        String responseString = result.getResponse().getContentAsString();
+        mvc.perform(get("/cars"))
+            .andExpect(status().isOk());
 
     }
 
@@ -112,6 +113,13 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+
+        MvcResult result = mvc.perform(get("/cars/1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Car car = json.parseObject(result.getResponse().getContentAsString());
+        assertTrue(car.getId() == getCar().getId());
     }
 
     /**
@@ -125,6 +133,8 @@ public class CarControllerTest {
          *   when the `delete` method is called from the Car Controller. This
          *   should utilize the car from `getCar()` below.
          */
+        mvc.perform(MockMvcRequestBuilders.delete("/cars/1"))
+            .andExpect(status().isNoContent());
     }
 
     /**
@@ -133,6 +143,7 @@ public class CarControllerTest {
      */
     private Car getCar() {
         Car car = new Car();
+        car.setId((long) 1);
         car.setLocation(new Location(40.730610, -73.935242));
         Details details = new Details();
         Manufacturer manufacturer = new Manufacturer(101, "Chevrolet");
